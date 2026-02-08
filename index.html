@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高配当株分析システム | Dividend Stock Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ========================================
+         ヘッダー: 検索フォーム
+    ========================================= -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <i class="fas fa-chart-line header-icon"></i>
+                <div>
+                    <h1 class="header-title">高配当株分析システム</h1>
+                    <p class="header-subtitle">Dividend Stock Analyzer — CPA基準による投資適格性評価</p>
+                </div>
+            </div>
+            <div class="search-area">
+                <div class="search-form">
+                    <div class="input-wrapper">
+                        <i class="fas fa-search input-icon"></i>
+                        <input 
+                            type="text" 
+                            id="stock-code" 
+                            placeholder="銘柄コード（例：9843）" 
+                            maxlength="4"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button id="search-btn" class="btn-primary">
+                        <i class="fas fa-magnifying-glass-chart"></i>
+                        <span>分析開始</span>
+                    </button>
+                </div>
+                <p id="error-message" class="error-message" role="alert"></p>
+                <div class="quick-links">
+                    <span class="quick-label">クイック選択:</span>
+                    <div id="quick-buttons" class="quick-buttons">
+                        <!-- JSで動的生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================
+         メインコンテンツ
+    ========================================= -->
+    <main class="main-content" id="main-content">
+        <!-- 初期画面: ウェルカムメッセージ -->
+        <div id="welcome-screen" class="welcome-screen">
+            <div class="welcome-inner">
+                <i class="fas fa-chart-pie welcome-icon"></i>
+                <h2>高配当株分析を開始しましょう</h2>
+                <p>銘柄コードを入力するか、クイック選択ボタンから銘柄を選んでください。<br>
+                    公認会計士の視点に基づく8つの財務指標で投資適格性を評価します。</p>
+                <div class="welcome-features">
+                    <div class="welcome-feature">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>投資適格性スコアリング</span>
+                    </div>
+                    <div class="welcome-feature">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <span>リスク警告システム</span>
+                    </div>
+                    <div class="welcome-feature">
+                        <i class="fas fa-table"></i>
+                        <span>年度別財務データ分析</span>
+                    </div>
+                    <div class="welcome-feature">
+                        <i class="fas fa-star"></i>
+                        <span>CPA基準判定</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分析結果エリア（初期非表示） -->
+        <div id="analysis-result" class="analysis-result" style="display: none;">
+
+            <!-- 銘柄情報表示 -->
+            <section class="stock-info-section" id="stock-info-section">
+                <div class="stock-info-header">
+                    <div class="stock-name-area">
+                        <span class="stock-code-badge" id="stock-code-badge"></span>
+                        <h2 class="stock-name" id="stock-name"></h2>
+                        <span class="stock-sector" id="stock-sector"></span>
+                    </div>
+                    <div class="stock-meta">
+                        <span class="data-period" id="data-period"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- サマリーカード（4つ） -->
+            <section class="summary-cards" id="summary-cards">
+                <!-- 投資適格性スコア -->
+                <div class="card card-score" id="card-score">
+                    <div class="card-header">
+                        <i class="fas fa-award"></i>
+                        <span>投資適格性スコア</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="score-circle" id="score-circle">
+                            <span class="score-value" id="score-value">--</span>
+                            <span class="score-unit">/ 100</span>
+                        </div>
+                        <p class="score-rank" id="score-rank">--</p>
+                    </div>
+                    <div class="card-footer" id="score-breakdown">
+                        <!-- スコア内訳 -->
+                    </div>
+                </div>
+
+                <!-- 売上高推移 -->
+                <div class="card card-sales" id="card-sales">
+                    <div class="card-header">
+                        <i class="fas fa-arrow-trend-up"></i>
+                        <span>売上高（直近）</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-main-value" id="sales-value">--</p>
+                        <p class="card-sub-value" id="sales-change">--</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-note" id="sales-trend">--</span>
+                    </div>
+                </div>
+
+                <!-- EPS推移 -->
+                <div class="card card-eps" id="card-eps">
+                    <div class="card-header">
+                        <i class="fas fa-coins"></i>
+                        <span>EPS（直近）</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-main-value" id="eps-value">--</p>
+                        <p class="card-sub-value" id="eps-change">--</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-note" id="eps-trend">--</span>
+                    </div>
+                </div>
+
+                <!-- 配当情報 -->
+                <div class="card card-dividend" id="card-dividend">
+                    <div class="card-header">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                        <span>1株配当（直近）</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-main-value" id="dividend-value">--</p>
+                        <p class="card-sub-value" id="dividend-payout">--</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-note" id="dividend-trend">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- リスク警告エリア -->
+            <section class="risk-section" id="risk-section" style="display: none;">
+                <div class="risk-header">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <h3>リスク警告</h3>
+                </div>
+                <div class="risk-list" id="risk-list">
+                    <!-- 動的に生成 -->
+                </div>
+            </section>
+
+            <!-- スコア詳細セクション -->
+            <section class="score-detail-section" id="score-detail-section">
+                <h3 class="section-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    投資適格性評価 — 詳細内訳
+                </h3>
+                <div class="score-detail-grid" id="score-detail-grid">
+                    <!-- 動的に生成 -->
+                </div>
+            </section>
+
+            <!-- データ一覧テーブル -->
+            <section class="data-table-section" id="data-table-section">
+                <h3 class="section-title">
+                    <i class="fas fa-table-columns"></i>
+                    年度別財務データ一覧
+                </h3>
+                <p class="table-legend">
+                    <span class="legend-item"><span class="legend-dot legend-good"></span> 良好</span>
+                    <span class="legend-item"><span class="legend-dot legend-danger"></span> 注意</span>
+                    <span class="legend-item"><span class="legend-dot legend-neutral"></span> 中立</span>
+                </p>
+                <div class="table-wrapper">
+                    <table class="data-table" id="data-table">
+                        <thead id="table-head">
+                            <!-- 動的に生成 -->
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- 動的に生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 免責事項 -->
+            <section class="disclaimer">
+                <p><i class="fas fa-info-circle"></i> 
+                    本システムの分析結果は情報提供を目的としており、投資助言ではありません。
+                    投資判断はご自身の責任で行ってください。データは過去の実績であり、将来の成績を保証するものではありません。
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2026 高配当株分析システム — Dividend Stock Analyzer</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
